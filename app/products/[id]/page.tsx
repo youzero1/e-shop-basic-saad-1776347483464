@@ -4,9 +4,10 @@ import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Star, ShoppingCart, ArrowLeft, Heart, Truck, RefreshCw, ShieldCheck } from 'lucide-react';
+import { Star, ShoppingCart, ArrowLeft, Heart, Truck, RefreshCw, ShieldCheck, Database } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import ProductCard from '@/components/ProductCard';
+import { useProduct } from '@/hooks/useProduct';
 import { useProducts } from '@/hooks/useProducts';
 
 export default function ProductDetailPage() {
@@ -17,9 +18,9 @@ export default function ProductDetailPage() {
   const [wished, setWished] = useState(false);
   const [quantity, setQuantity] = useState(1);
 
-  const { products, loading } = useProducts();
   const productId = Number(params.id);
-  const product = products.find((p) => p.id === productId);
+  const { product, loading, error } = useProduct(productId);
+  const { products } = useProducts();
 
   if (loading) {
     return (
@@ -39,16 +40,23 @@ export default function ProductDetailPage() {
     );
   }
 
-  if (!product) {
+  if (error || !product) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4">
+        <div className="bg-gray-100 p-4 rounded-full">
+          <Database className="w-8 h-8 text-gray-400" />
+        </div>
         <p className="text-2xl font-bold text-gray-800">Product not found</p>
-        <Link href="/products" className="text-blue-600 hover:underline">Back to Products</Link>
+        {error && <p className="text-gray-500 text-sm">{error}</p>}
+        <Link href="/products" className="text-blue-600 hover:underline font-semibold">Back to Products</Link>
       </div>
     );
   }
 
-  const related = products.filter((p) => p.category === product.category && p.id !== product.id).slice(0, 4);
+  const related = products
+    .filter((p) => p.category === product.category && p.id !== product.id)
+    .slice(0, 4);
+
   const discount = product.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : null;
