@@ -2,17 +2,17 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, ShieldCheck, Truck, RefreshCw, Star } from 'lucide-react';
-import ProductCard from '@/components/ProductCard';
+import { ArrowRight, Truck, RefreshCw, ShieldCheck, Star, Database } from 'lucide-react';
 import { useProducts } from '@/hooks/useProducts';
+import ProductCard from '@/components/ProductCard';
 
 export default function HomePage() {
-  const { products, loading } = useProducts();
+  const { products, loading, error } = useProducts();
   const featured = products.slice(0, 4);
 
   return (
     <div>
-      {/* Hero */}
+      {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-700 text-white overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-10 w-64 h-64 bg-white rounded-full blur-3xl" />
@@ -68,7 +68,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Trust Badges */}
+      {/* Features Bar */}
       <section className="bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
@@ -103,6 +103,12 @@ export default function HomePage() {
           <div>
             <h2 className="text-3xl font-extrabold text-gray-900">Featured Products</h2>
             <p className="text-gray-500 mt-1">Handpicked just for you</p>
+            {!loading && !error && products.length > 0 && (
+              <div className="mt-2 flex items-center gap-1.5 text-xs text-green-700 bg-green-50 border border-green-200 rounded-full px-3 py-1 w-fit">
+                <Database className="w-3 h-3" />
+                <span>Live from Supabase</span>
+              </div>
+            )}
           </div>
           <Link
             href="/products"
@@ -126,6 +132,21 @@ export default function HomePage() {
               </div>
             ))}
           </div>
+        ) : error || featured.length === 0 ? (
+          <div className="bg-gray-50 border border-dashed border-gray-300 rounded-2xl p-12 text-center">
+            <div className="flex flex-col items-center gap-3">
+              <div className="bg-gray-100 p-4 rounded-full">
+                <Database className="w-8 h-8 text-gray-400" />
+              </div>
+              <p className="text-gray-600 font-semibold">No products in database</p>
+              <p className="text-gray-400 text-sm max-w-xs">
+                Add products to your Supabase <code className="bg-gray-200 px-1 rounded">products</code> table to see them here.
+              </p>
+              <Link href="/products" className="mt-2 text-blue-600 font-semibold text-sm hover:underline">
+                Go to Products page
+              </Link>
+            </div>
+          </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {featured.map((product) => (
@@ -135,10 +156,7 @@ export default function HomePage() {
         )}
 
         <div className="sm:hidden mt-6 text-center">
-          <Link
-            href="/products"
-            className="inline-flex items-center gap-2 text-blue-600 font-semibold"
-          >
+          <Link href="/products" className="inline-flex items-center gap-2 text-blue-600 font-semibold">
             View All Products <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
@@ -156,16 +174,14 @@ export default function HomePage() {
             ].map((review, i) => (
               <div key={i} className="bg-gray-50 rounded-2xl p-6 flex flex-col gap-3">
                 <div className="flex gap-1">
-                  {[1, 2, 3, 4, 5].map((star) => (
+                  {[1, 2, 3, 4, 5].map((s) => (
                     <Star
-                      key={star}
-                      className={`w-4 h-4 ${
-                        star <= review.rating ? 'fill-amber-400 text-amber-400' : 'text-gray-200 fill-gray-200'
-                      }`}
+                      key={s}
+                      className={`w-4 h-4 ${s <= review.rating ? 'fill-amber-400 text-amber-400' : 'text-gray-200 fill-gray-200'}`}
                     />
                   ))}
                 </div>
-                <p className="text-gray-600 text-sm italic">"{review.text}"</p>
+                <p className="text-gray-600 text-sm italic">&ldquo;{review.text}&rdquo;</p>
                 <p className="font-semibold text-gray-800 text-sm">— {review.name}</p>
               </div>
             ))}
@@ -173,7 +189,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* CTA Banner */}
+      {/* CTA */}
       <section className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white py-16">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-extrabold mb-4">Ready to Start Shopping?</h2>

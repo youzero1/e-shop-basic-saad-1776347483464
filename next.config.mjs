@@ -6,10 +6,12 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'images.unsplash.com',
       },
+      {
+        protocol: 'https',
+        hostname: '**.supabase.co',
+      },
     ],
   },
-  // Prevent static generation errors when env vars are missing
-  output: 'standalone',
-}
+};
 
-export default nextConfig
+export default nextConfig;

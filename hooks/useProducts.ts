@@ -1,58 +1,71 @@
-import { useState, useEffect } from 'react'
-import { Product } from '@/types'
-import { fallbackProducts } from '@/lib/products'
+'use client';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+import { useState, useEffect } from 'react';
+import { Product } from '@/types';
 
 export function useProducts() {
-  const [products, setProducts] = useState<Product[]>(fallbackProducts)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchProducts() {
-      if (!supabaseUrl || !supabaseAnonKey) {
-        console.warn('Supabase env vars not set, using fallback products.')
-        setLoading(false)
-        return
-      }
-
       try {
-        const { createClient } = await import('@supabase/supabase-js')
-        const supabase = createClient(supabaseUrl, supabaseAnonKey)
-        const { data, error } = await supabase
+        setLoading(true);
+        setError(null);
+
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+        if (!supabaseUrl || !supabaseAnonKey) {
+          setError('Missing Supabase environment variables.');
+          setProducts([]);
+          return;
+        }
+
+        const { createClient } = await import('@supabase/supabase-js');
+        const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+        const { data, error: fetchError } = await supabase
           .from('products')
           .select('*')
-          .order('id', { ascending: true })
+          .order('id', { ascending: true });
 
-        if (error) throw error
+        if (fetchError) throw fetchError;
 
         if (data && data.length > 0) {
-          const mapped: Product[] = data.map((p: any) => ({
-            id: Number(p.id),
-            name: p.name,
-            price: Number(p.price),
-            originalPrice: p.original_price ? Number(p.original_price) : undefined,
-            image: p.image,
-            category: p.category,
-            rating: Number(p.rating),
-            reviews: Number(p.reviews),
-            badge: p.badge ?? undefined,
-            description: p.description,
-          }))
-          setProducts(mapped)
+          const mapped: Product[] = data.map((item: any) => ({
+            id: Number(item.id),
+            name: item.name,
+            price: Number(item.price),
+            originalPrice: item.original_price ? Number(item.original_price) : undefined,
+            image: item.image,
+            category: item.category,
+            rating: Number(item.rating),
+            reviews: Number(item.reviews),
+            badge: item.badge ?? undefined,
+            description: item.description,
+          }));
+          setProducts(mapped);
+        } else {
+          setProducts([]);
+          setError('No products found in the database. Please add products via the Supabase dashboard.');
         }
-      } catch (err) {
-        console.error('Failed to fetch products from Supabase:', err)
-        setError('Could not load products from database. Showing default catalogue.')
+      } catch (err: any) {
+        console.error('Failed to fetch products from Supabase:', err);
+        setError(
+          err?.message
+            ? `Database error: ${err.message}`
+            : 'Could not connect to the database. Check your Supabase environment variables.'
+        );
+        setProducts([]);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     }
 
-    fetchProducts()
-  }, [])
+    fetchProducts();
+  }, []);
 
-  return { products, loading, error }
+  return { products, loading, error };
 }
