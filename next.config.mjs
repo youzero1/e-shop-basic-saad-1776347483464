@@ -1,6 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
   images: {
     remotePatterns: [
       {
@@ -9,6 +8,8 @@ const nextConfig = {
       },
     ],
   },
-};
+  // Prevent static generation errors when env vars are missing
+  output: 'standalone',
+}
 
-export default nextConfig;
+export default nextConfig

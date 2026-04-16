@@ -5,9 +5,9 @@ import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Star, ShoppingCart, ArrowLeft, Heart, Truck, RefreshCw, ShieldCheck } from 'lucide-react';
-import { products } from '@/lib/products';
 import { useCart } from '@/context/CartContext';
 import ProductCard from '@/components/ProductCard';
+import { useProducts } from '@/hooks/useProducts';
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -17,8 +17,27 @@ export default function ProductDetailPage() {
   const [wished, setWished] = useState(false);
   const [quantity, setQuantity] = useState(1);
 
+  const { products, loading } = useProducts();
   const productId = Number(params.id);
   const product = products.find((p) => p.id === productId);
+
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 animate-pulse">
+          <div className="aspect-square bg-gray-200 rounded-3xl" />
+          <div className="flex flex-col gap-4">
+            <div className="h-4 bg-gray-200 rounded w-1/4" />
+            <div className="h-8 bg-gray-200 rounded w-3/4" />
+            <div className="h-4 bg-gray-200 rounded w-1/3" />
+            <div className="h-10 bg-gray-200 rounded w-1/2" />
+            <div className="h-24 bg-gray-200 rounded" />
+            <div className="h-12 bg-gray-200 rounded-2xl" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!product) {
     return (

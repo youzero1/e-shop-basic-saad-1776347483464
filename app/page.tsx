@@ -1,10 +1,13 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, ShieldCheck, Truck, RefreshCw, Star } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
-import { products } from '@/lib/products';
+import { useProducts } from '@/hooks/useProducts';
 
 export default function HomePage() {
+  const { products, loading } = useProducts();
   const featured = products.slice(0, 4);
 
   return (
@@ -108,11 +111,29 @@ export default function HomePage() {
             View All <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {featured.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden animate-pulse">
+                <div className="aspect-square bg-gray-200" />
+                <div className="p-4 flex flex-col gap-3">
+                  <div className="h-3 bg-gray-200 rounded w-1/3" />
+                  <div className="h-4 bg-gray-200 rounded w-3/4" />
+                  <div className="h-3 bg-gray-200 rounded w-1/2" />
+                  <div className="h-8 bg-gray-200 rounded-xl mt-2" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {featured.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        )}
+
         <div className="sm:hidden mt-6 text-center">
           <Link
             href="/products"
