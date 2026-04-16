@@ -24,89 +24,107 @@ export default function ProductCard({ product }: { product: Product }) {
     setWished(!wished);
   };
 
-  const discount = product.originalPrice
-    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
-    : null;
+  const discount =
+    product.originalPrice
+      ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+      : null;
 
   return (
-    <Link href={`/products/${product.id}`} className="group block">
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col">
+    <Link href={`/products/${product.id}`} className="group block h-full">
+      <div className="bg-white rounded-2xl overflow-hidden flex flex-col h-full shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
         {/* Image */}
-        <div className="relative aspect-square overflow-hidden bg-gray-50">
+        <div className="relative aspect-square bg-gray-50 overflow-hidden">
           <Image
             src={product.image}
             alt={product.name}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-500"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           />
-          {/* Badge */}
-          {product.badge && (
-            <span
-              className={`absolute top-3 left-3 text-xs font-bold px-2 py-1 rounded-full ${
-                product.badge === 'Sale'
-                  ? 'bg-red-500 text-white'
-                  : product.badge === 'New'
-                  ? 'bg-green-500 text-white'
-                  : 'bg-blue-500 text-white'
-              }`}
-            >
-              {product.badge}
-            </span>
-          )}
-          {discount && (
-            <span className="absolute top-3 right-10 text-xs font-bold bg-orange-500 text-white px-2 py-1 rounded-full">
-              -{discount}%
-            </span>
-          )}
-          {/* Wishlist Button */}
+          {/* Badges */}
+          <div className="absolute top-3 left-3 flex flex-col gap-1.5">
+            {product.badge && (
+              <span
+                className={`text-xs font-bold px-2.5 py-1 rounded-full shadow-sm ${
+                  product.badge === 'Sale'
+                    ? 'bg-rose-500 text-white'
+                    : product.badge === 'New'
+                    ? 'bg-emerald-500 text-white'
+                    : 'bg-violet-500 text-white'
+                }`}
+              >
+                {product.badge}
+              </span>
+            )}
+            {discount && (
+              <span className="text-xs font-bold bg-amber-400 text-amber-900 px-2.5 py-1 rounded-full shadow-sm">
+                -{discount}%
+              </span>
+            )}
+          </div>
+          {/* Wishlist */}
           <button
             onClick={handleWish}
-            className="absolute top-2 right-2 p-2 bg-white rounded-full shadow hover:scale-110 transition-transform"
+            aria-label="Wishlist"
+            className="absolute top-3 right-3 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full shadow flex items-center justify-center hover:scale-110 transition-transform"
           >
             <Heart
               className={`w-4 h-4 transition-colors ${
-                wished ? 'fill-red-500 text-red-500' : 'text-gray-400'
+                wished ? 'fill-rose-500 text-rose-500' : 'text-gray-400'
               }`}
             />
           </button>
         </div>
 
-        {/* Info */}
+        {/* Body */}
         <div className="p-4 flex flex-col flex-1 gap-2">
-          <p className="text-xs text-blue-600 font-medium uppercase tracking-wide">{product.category}</p>
-          <h3 className="text-sm font-semibold text-gray-800 line-clamp-2 leading-snug">{product.name}</h3>
+          <span className="text-xs font-semibold text-indigo-600 uppercase tracking-wider">
+            {product.category}
+          </span>
+          <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 leading-snug flex-1">
+            {product.name}
+          </h3>
 
-          {/* Rating */}
-          <div className="flex items-center gap-1">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <Star
-                key={star}
-                className={`w-3.5 h-3.5 ${
-                  star <= Math.round(product.rating)
-                    ? 'fill-amber-400 text-amber-400'
-                    : 'text-gray-200 fill-gray-200'
-                }`}
-              />
-            ))}
-            <span className="text-xs text-gray-500 ml-1">({product.reviews.toLocaleString()})</span>
+          {/* Stars */}
+          <div className="flex items-center gap-1.5">
+            <div className="flex gap-0.5">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Star
+                  key={star}
+                  className={`w-3.5 h-3.5 ${
+                    star <= Math.round(product.rating)
+                      ? 'fill-amber-400 text-amber-400'
+                      : 'fill-gray-200 text-gray-200'
+                  }`}
+                />
+              ))}
+            </div>
+            <span className="text-xs text-gray-500">
+              {product.rating.toFixed(1)}{' '}
+              <span className="text-gray-400">({product.reviews.toLocaleString()})</span>
+            </span>
           </div>
 
-          {/* Price */}
-          <div className="flex items-baseline gap-2 mt-auto pt-1">
-            <span className="text-lg font-bold text-gray-900">${product.price.toFixed(2)}</span>
-            {product.originalPrice && (
-              <span className="text-sm text-gray-400 line-through">${product.originalPrice.toFixed(2)}</span>
-            )}
+          {/* Price + CTA */}
+          <div className="flex items-center justify-between mt-1 gap-2">
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-lg font-extrabold text-gray-900">
+                ${product.price.toFixed(2)}
+              </span>
+              {product.originalPrice && (
+                <span className="text-xs text-gray-400 line-through">
+                  ${product.originalPrice.toFixed(2)}
+                </span>
+              )}
+            </div>
           </div>
 
-          {/* Add to Cart */}
           <button
             onClick={handleAddToCart}
-            className={`mt-2 w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all duration-200 ${
+            className={`mt-2 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
               added
-                ? 'bg-green-500 text-white'
-                : 'bg-blue-600 hover:bg-blue-700 text-white active:scale-95'
+                ? 'bg-emerald-500 text-white'
+                : 'bg-indigo-600 hover:bg-indigo-700 text-white active:scale-95'
             }`}
           >
             <ShoppingCart className="w-4 h-4" />

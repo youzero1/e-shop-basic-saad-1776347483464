@@ -10,29 +10,33 @@ export function useProducts() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
+
     async function load() {
       try {
         setLoading(true);
         setError(null);
         const data = await fetchProducts();
-        if (data.length === 0) {
-          setError('No products found. Please add products to your Supabase products table.');
+        if (!cancelled) {
+          setProducts(data);
+          if (data.length === 0) {
+            setError('no_products');
+          }
         }
-        setProducts(data);
-      } catch (err: any) {
-        console.error('Failed to fetch products:', err);
-        setError(
-          err?.message
-            ? `Database error: ${err.message}`
-            : 'Could not connect to the database. Check your Supabase environment variables.'
-        );
-        setProducts([]);
+      } catch (err: unknown) {
+        if (!cancelled) {
+          const msg = err instanceof Error ? err.message : 'Unknown error';
+          console.error('[useProducts]', msg);
+          setError(msg);
+          setProducts([]);
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
 
     load();
+    return () => { cancelled = true; };
   }, []);
 
   return { products, loading, error };

@@ -16,25 +16,31 @@ export function useProduct(id: number) {
       return;
     }
 
+    let cancelled = false;
+
     async function load() {
       try {
         setLoading(true);
         setError(null);
         const data = await fetchProductById(id);
-        if (!data) {
-          setError('Product not found.');
+        if (!cancelled) {
+          setProduct(data);
+          if (!data) setError('Product not found.');
         }
-        setProduct(data);
-      } catch (err: any) {
-        console.error('Failed to fetch product:', err);
-        setError(err?.message ?? 'Could not load product.');
-        setProduct(null);
+      } catch (err: unknown) {
+        if (!cancelled) {
+          const msg = err instanceof Error ? err.message : 'Could not load product.';
+          console.error('[useProduct]', msg);
+          setError(msg);
+          setProduct(null);
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
 
     load();
+    return () => { cancelled = true; };
   }, [id]);
 
   return { product, loading, error };
