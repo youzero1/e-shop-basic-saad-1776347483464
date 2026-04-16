@@ -1,5 +1,5 @@
-import Image from 'next/image';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowRight, Target, Users, Award, Globe } from 'lucide-react';
 
 export default function AboutPage() {
@@ -10,7 +10,7 @@ export default function AboutPage() {
         <div className="max-w-4xl mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-5xl font-extrabold mb-4">About ShopZap</h1>
           <p className="text-blue-100 text-lg max-w-2xl mx-auto">
-            We're on a mission to make premium products accessible to everyone, with unbeatable prices and a world-class shopping experience.
+            We&apos;re on a mission to make premium products accessible to everyone, with unbeatable prices and a world-class shopping experience.
           </p>
         </div>
       </section>
@@ -21,10 +21,12 @@ export default function AboutPage() {
           <div>
             <h2 className="text-3xl font-extrabold text-gray-900 mb-4">Our Story</h2>
             <p className="text-gray-600 leading-relaxed mb-4">
-              ShopZap was founded in 2020 with a simple idea: make online shopping feel effortless and enjoyable. We started with a small catalog of electronics and have since grown into a full-featured marketplace.
+              ShopZap was founded in 2020 with a simple idea: make online shopping feel effortless and enjoyable.
+              We started with a small catalog of electronics and have since grown into a full-featured marketplace.
             </p>
             <p className="text-gray-600 leading-relaxed mb-6">
-              Today, we serve over 500,000 happy customers worldwide, offering thousands of carefully curated products across multiple categories — all backed by our satisfaction guarantee.
+              Today, we serve over 500,000 happy customers worldwide, offering thousands of carefully curated
+              products across multiple categories — all backed by our satisfaction guarantee.
             </p>
             <Link
               href="/products"
@@ -69,26 +71,10 @@ export default function AboutPage() {
         <h2 className="text-3xl font-extrabold text-gray-900 text-center mb-10">Our Values</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
-            {
-              icon: <Target className="w-7 h-7 text-blue-600" />,
-              title: 'Quality First',
-              desc: 'Every product is vetted for quality before it appears on our platform.',
-            },
-            {
-              icon: <Users className="w-7 h-7 text-blue-600" />,
-              title: 'Customer Focus',
-              desc: 'Our customers are at the heart of every decision we make.',
-            },
-            {
-              icon: <Award className="w-7 h-7 text-blue-600" />,
-              title: 'Excellence',
-              desc: 'We strive for excellence in service, product selection, and experience.',
-            },
-            {
-              icon: <Globe className="w-7 h-7 text-blue-600" />,
-              title: 'Global Reach',
-              desc: 'Delivering to customers in over 50 countries with fast, reliable shipping.',
-            },
+            { icon: <Target className="w-7 h-7 text-blue-600" />, title: 'Quality First', desc: 'Every product is vetted for quality before it appears on our platform.' },
+            { icon: <Users className="w-7 h-7 text-blue-600" />, title: 'Customer Focus', desc: 'Our customers are at the heart of every decision we make.' },
+            { icon: <Award className="w-7 h-7 text-blue-600" />, title: 'Excellence', desc: 'We strive for excellence in service, product selection, and experience.' },
+            { icon: <Globe className="w-7 h-7 text-blue-600" />, title: 'Global Reach', desc: 'Delivering to customers in over 50 countries with fast, reliable shipping.' },
           ].map((val, i) => (
             <div key={i} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col gap-3">
               <div className="bg-blue-50 p-3 rounded-xl w-fit">{val.icon}</div>

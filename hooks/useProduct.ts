@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Product } from '@/types';
 import { fetchProductById } from '@/lib/products';
+import { Product } from '@/types';
 
 export function useProduct(id: number) {
   const [product, setProduct] = useState<Product | null>(null);
@@ -27,7 +27,7 @@ export function useProduct(id: number) {
           setProduct(data);
           if (!data) setError('Product not found.');
         }
-      } catch (err: unknown) {
+      } catch (err) {
         if (!cancelled) {
           const msg = err instanceof Error ? err.message : 'Could not load product.';
           console.error('[useProduct]', msg);

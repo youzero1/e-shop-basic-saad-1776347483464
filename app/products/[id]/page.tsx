@@ -4,7 +4,15 @@ import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Star, ShoppingCart, ArrowLeft, Heart, Truck, RefreshCw, ShieldCheck } from 'lucide-react';
+import {
+  ArrowLeft,
+  ShoppingCart,
+  Heart,
+  Star,
+  Truck,
+  RefreshCw,
+  ShieldCheck,
+} from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import ProductCard from '@/components/ProductCard';
 import { useProduct } from '@/hooks/useProduct';
@@ -15,11 +23,10 @@ export default function ProductDetailPage() {
   const router = useRouter();
   const { addToCart } = useCart();
   const [added, setAdded] = useState(false);
-  const [wished, setWished] = useState(false);
-  const [quantity, setQuantity] = useState(1);
+  const [wishlisted, setWishlisted] = useState(false);
+  const [qty, setQty] = useState(1);
 
-  const productId = Number(params.id);
-  const { product, loading, error } = useProduct(productId);
+  const { product, loading, error } = useProduct(Number(params.id));
   const { products } = useProducts();
 
   if (loading) {
@@ -58,24 +65,14 @@ export default function ProductDetailPage() {
     );
   }
 
-  const related = products
-    .filter((p) => p.category === product.category && p.id !== product.id)
-    .slice(0, 4);
-
+  const related = products.filter(p => p.category === product.category && p.id !== product.id).slice(0, 4);
   const discount = product.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : null;
 
-  const handleAddToCart = () => {
-    for (let i = 0; i < quantity; i++) addToCart(product);
-    setAdded(true);
-    setTimeout(() => setAdded(false), 2000);
-  };
-
   return (
     <div className="bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Breadcrumb */}
         <button
           onClick={() => router.back()}
           className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-indigo-600 transition-colors mb-8 font-medium"
@@ -84,7 +81,7 @@ export default function ProductDetailPage() {
         </button>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
-          {/* ── Image Panel ── */}
+          {/* Image */}
           <div className="relative">
             <div className="relative aspect-square bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100">
               <Image
@@ -116,25 +113,21 @@ export default function ProductDetailPage() {
             </div>
           </div>
 
-          {/* ── Details Panel ── */}
+          {/* Details */}
           <div className="flex flex-col gap-5">
             <div>
-              <span className="text-xs font-bold text-indigo-600 uppercase tracking-widest">
-                {product.category}
-              </span>
-              <h1 className="text-3xl font-extrabold text-gray-900 mt-1 leading-tight">
-                {product.name}
-              </h1>
+              <span className="text-xs font-bold text-indigo-600 uppercase tracking-widest">{product.category}</span>
+              <h1 className="text-3xl font-extrabold text-gray-900 mt-1 leading-tight">{product.name}</h1>
             </div>
 
             {/* Rating */}
             <div className="flex items-center gap-3">
               <div className="flex gap-0.5">
-                {[1, 2, 3, 4, 5].map((star) => (
+                {[1, 2, 3, 4, 5].map(s => (
                   <Star
-                    key={star}
+                    key={s}
                     className={`w-5 h-5 ${
-                      star <= Math.round(product.rating)
+                      s <= Math.round(product.rating)
                         ? 'fill-amber-400 text-amber-400'
                         : 'fill-gray-200 text-gray-200'
                     }`}
@@ -147,13 +140,9 @@ export default function ProductDetailPage() {
 
             {/* Price */}
             <div className="flex items-baseline gap-3">
-              <span className="text-4xl font-extrabold text-gray-900">
-                ${product.price.toFixed(2)}
-              </span>
+              <span className="text-4xl font-extrabold text-gray-900">${product.price.toFixed(2)}</span>
               {product.originalPrice && (
-                <span className="text-xl text-gray-400 line-through">
-                  ${product.originalPrice.toFixed(2)}
-                </span>
+                <span className="text-xl text-gray-400 line-through">${product.originalPrice.toFixed(2)}</span>
               )}
               {discount && (
                 <span className="bg-rose-100 text-rose-600 text-sm font-bold px-2.5 py-1 rounded-full">
@@ -162,24 +151,21 @@ export default function ProductDetailPage() {
               )}
             </div>
 
-            {/* Description */}
-            <p className="text-gray-600 leading-relaxed text-sm border-t border-gray-100 pt-4">
-              {product.description}
-            </p>
+            <p className="text-gray-600 leading-relaxed text-sm border-t border-gray-100 pt-4">{product.description}</p>
 
-            {/* Quantity */}
+            {/* Qty */}
             <div className="flex items-center gap-4">
               <span className="text-sm font-semibold text-gray-700">Quantity</span>
               <div className="flex items-center bg-gray-100 rounded-xl overflow-hidden">
                 <button
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  onClick={() => setQty(Math.max(1, qty - 1))}
                   className="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors font-bold text-lg"
                 >
                   −
                 </button>
-                <span className="w-10 text-center text-gray-900 font-semibold">{quantity}</span>
+                <span className="w-10 text-center text-gray-900 font-semibold">{qty}</span>
                 <button
-                  onClick={() => setQuantity(quantity + 1)}
+                  onClick={() => setQty(qty + 1)}
                   className="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors font-bold text-lg"
                 >
                   +
@@ -187,10 +173,14 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
-            {/* CTA */}
+            {/* Actions */}
             <div className="flex gap-3">
               <button
-                onClick={handleAddToCart}
+                onClick={() => {
+                  for (let i = 0; i < qty; i++) addToCart(product);
+                  setAdded(true);
+                  setTimeout(() => setAdded(false), 2000);
+                }}
                 className={`flex-1 flex items-center justify-center gap-2 py-3.5 px-6 rounded-2xl font-bold text-base transition-all duration-200 ${
                   added
                     ? 'bg-emerald-500 text-white'
@@ -201,26 +191,21 @@ export default function ProductDetailPage() {
                 {added ? '✓ Added to Cart!' : 'Add to Cart'}
               </button>
               <button
-                onClick={() => setWished(!wished)}
+                onClick={() => setWishlisted(!wishlisted)}
                 aria-label="Wishlist"
                 className={`p-3.5 rounded-2xl border-2 transition-all ${
-                  wished
-                    ? 'border-rose-300 bg-rose-50'
-                    : 'border-gray-200 hover:border-rose-300 hover:bg-rose-50'
+                  wishlisted ? 'border-rose-300 bg-rose-50' : 'border-gray-200 hover:border-rose-300 hover:bg-rose-50'
                 }`}
               >
                 <Heart
                   className={`w-5 h-5 transition-colors ${
-                    wished ? 'fill-rose-500 text-rose-500' : 'text-gray-400'
+                    wishlisted ? 'fill-rose-500 text-rose-500' : 'text-gray-400'
                   }`}
                 />
               </button>
             </div>
 
-            <Link
-              href="/cart"
-              className="text-center text-indigo-600 font-semibold text-sm hover:underline"
-            >
+            <Link href="/cart" className="text-center text-indigo-600 font-semibold text-sm hover:underline">
               View Cart →
             </Link>
 
@@ -241,14 +226,12 @@ export default function ProductDetailPage() {
           </div>
         </div>
 
-        {/* Related Products */}
+        {/* Related */}
         {related.length > 0 && (
           <div className="mt-20">
             <h2 className="text-2xl font-extrabold text-gray-900 mb-6">You Might Also Like</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {related.map((p) => (
-                <ProductCard key={p.id} product={p} />
-              ))}
+              {related.map(p => <ProductCard key={p.id} product={p} />)}
             </div>
           </div>
         )}

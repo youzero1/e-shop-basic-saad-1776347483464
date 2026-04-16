@@ -1,21 +1,25 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import { CartProvider } from '@/context/CartContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { CartProvider } from '@/context/CartContext';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 export const metadata: Metadata = {
-  title: 'ShopZap — Premium E-Commerce',
-  description: 'Your go-to destination for premium products at unbeatable prices.',
+  title: 'ShopZap — Premium Shopping',
+  description: 'Discover amazing products at unbeatable prices.',
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="en">
-      <body className={`${inter.className} bg-gray-50 min-h-screen flex flex-col`}>
+    <html lang="en" className={inter.variable}>
+      <body className="min-h-screen flex flex-col bg-gray-50 font-sans">
         <CartProvider>
           <Navbar />
           <main className="flex-1">{children}</main>

@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Product } from '@/types';
 import { fetchProducts } from '@/lib/products';
+import { Product } from '@/types';
 
 export function useProducts() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -19,11 +19,9 @@ export function useProducts() {
         const data = await fetchProducts();
         if (!cancelled) {
           setProducts(data);
-          if (data.length === 0) {
-            setError('no_products');
-          }
+          if (data.length === 0) setError('no_products');
         }
-      } catch (err: unknown) {
+      } catch (err) {
         if (!cancelled) {
           const msg = err instanceof Error ? err.message : 'Unknown error';
           console.error('[useProducts]', msg);
