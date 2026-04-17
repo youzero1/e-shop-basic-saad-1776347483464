@@ -1,48 +1,56 @@
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 import { Product } from '@/types';
 
-// Map DB row (snake_case) → app type (camelCase)
-function mapProduct(row: Record<string, unknown>): Product {
-  return {
-    id: row.id as number,
-    name: row.name as string,
-    price: Number(row.price),
-    originalPrice: row.original_price != null ? Number(row.original_price) : undefined,
-    description: row.description as string,
-    category: row.category as string,
-    image: row.image as string,
-    rating: Number(row.rating),
-    reviews: row.reviews as number,
-    badge: (row.badge as string | null) ?? undefined,
-  };
+function getSupabaseClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !key) return null;
+  return createClient(url, key);
 }
 
 export async function fetchProducts(): Promise<Product[]> {
-  const { data, error } = await supabase
-    .from('products')
-    .select('id, name, price, original_price, description, category, image, rating, reviews, badge')
-    .order('id', { ascending: true });
+  const supabase = getSupabaseClient();
+  if (!supabase) return [];
 
-  if (error) {
-    console.error('[fetchProducts] Supabase error:', error);
-    throw new Error(error.message);
-  }
+  const { data, error } = await supabase.from('products').select('*');
+  if (error || !data) return [];
 
-  return (data ?? []).map(mapProduct);
+  return data.map((row: any) => ({
+    id: String(row.id),
+    name: row.name,
+    price: Number(row.price),
+    originalPrice: row.original_price ? Number(row.original_price) : undefined,
+    description: row.description,
+    category: row.category,
+    image: row.image,
+    rating: Number(row.rating),
+    reviews: Number(row.reviews),
+    badge: row.badge ?? undefined,
+  }));
 }
 
-export async function fetchProductById(id: number): Promise<Product | null> {
+export async function fetchProductById(id: number | string): Promise<Product | null> {
+  const supabase = getSupabaseClient();
+  if (!supabase) return null;
+
   const { data, error } = await supabase
     .from('products')
-    .select('id, name, price, original_price, description, category, image, rating, reviews, badge')
+    .select('*')
     .eq('id', id)
     .single();
 
-  if (error) {
-    if (error.code === 'PGRST116') return null;
-    console.error('[fetchProductById] Supabase error:', error);
-    throw new Error(error.message);
-  }
+  if (error || !data) return null;
 
-  return data ? mapProduct(data as Record<string, unknown>) : null;
+  return {
+    id: String(data.id),
+    name: data.name,
+    price: Number(data.price),
+    originalPrice: data.original_price ? Number(data.original_price) : undefined,
+    description: data.description,
+    category: data.category,
+    image: data.image,
+    rating: Number(data.rating),
+    reviews: Number(data.reviews),
+    badge: data.badge ?? undefined,
+  };
 }

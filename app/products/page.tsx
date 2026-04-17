@@ -1,169 +1,167 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { Search, SlidersHorizontal, ChevronDown, X } from 'lucide-react';
-import ProductCard from '@/components/ProductCard';
-import { useProducts } from '@/hooks/useProducts';
+import { useEffect, useState } from 'react';
 import { useTheme } from '@/context/ThemeContext';
+import ProductCard from '@/components/ProductCard';
+import { Search, SlidersHorizontal } from 'lucide-react';
+import { createClient } from '@supabase/supabase-js';
+import { Product } from '@/types';
 
-function ProductsContent() {
-  const searchParams = useSearchParams();
-  const categoryParam = searchParams.get('category') || '';
-  const { products, loading, error } = useProducts();
+function getSupabase() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !key) return null;
+  return createClient(url, key);
+}
+
+function mapProduct(p: any): Product {
+  return {
+    id: String(p.id),
+    name: p.name,
+    price: Number(p.price),
+    originalPrice: p.original_price ? Number(p.original_price) : undefined,
+    description: p.description,
+    category: p.category,
+    image: p.image,
+    rating: Number(p.rating),
+    reviews: Number(p.reviews),
+    badge: p.badge ?? undefined,
+  };
+}
+
+export default function ProductsPage() {
   const { config } = useTheme();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [category, setCategory] = useState(categoryParam);
+  const [category, setCategory] = useState('All');
   const [sort, setSort] = useState('default');
 
   useEffect(() => {
-    setCategory(categoryParam);
-  }, [categoryParam]);
+    const supabase = getSupabase();
+    if (!supabase) { setLoading(false); return; }
+    supabase
+      .from('products')
+      .select('*')
+      .then(({ data }) => {
+        if (data) setProducts(data.map(mapProduct));
+        setLoading(false);
+      });
+  }, []);
 
-  const allCategories = ['All', ...Array.from(new Set(products.map(p => p.category)))];
+  const categories = ['All', ...Array.from(new Set(products.map(p => p.category)))];
 
   const filtered = products
     .filter(p => {
-      const matchCat = !category || category === 'All' || p.category === category;
-      const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
+      const matchCat = category === 'All' || p.category === category;
+      const matchSearch =
+        !search ||
+        p.name.toLowerCase().includes(search.toLowerCase()) ||
+        p.description.toLowerCase().includes(search.toLowerCase());
       return matchCat && matchSearch;
     })
     .sort((a, b) => {
       if (sort === 'price-asc') return a.price - b.price;
       if (sort === 'price-desc') return b.price - a.price;
-      if (sort === 'name') return a.name.localeCompare(b.name);
+      if (sort === 'rating') return b.rating - a.rating;
       return 0;
     });
 
   return (
-    <div className={`min-h-screen ${config.bg} transition-colors duration-300`}>
+    <div className="max-w-7xl mx-auto px-4 py-12">
       {/* Header */}
-      <div className={`${config.surface} border-b ${config.border} transition-colors duration-300`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <h1 className={`text-4xl font-extrabold ${config.text} mb-1`}>All Products</h1>
-          <p className={`${config.textMuted} text-sm`}>
-            {loading
-              ? 'Loading products…'
-              : `${filtered.length} product${filtered.length !== 1 ? 's' : ''} found`}
-          </p>
-        </div>
+      <div className="mb-10">
+        <p className={['text-xs font-bold uppercase tracking-widest mb-1', config.primaryText].join(' ')}>
+          Our Collection
+        </p>
+        <h1 className={['text-4xl font-extrabold', config.text].join(' ')}>All Products</h1>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Search & Sort */}
-        <div className="flex flex-col sm:flex-row gap-3 mb-6">
-          <div className="relative flex-1">
-            <Search className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 ${config.textMuted}`} />
-            <input
-              type="text"
-              placeholder="Search products…"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className={`w-full pl-10 pr-10 py-2.5 border ${config.border} rounded-xl text-sm focus:outline-none focus:ring-2 ${config.ring} focus:border-transparent ${config.surface} ${config.text} shadow-sm transition-colors`}
-            />
-            {search && (
-              <button
-                onClick={() => setSearch('')}
-                className={`absolute right-3.5 top-1/2 -translate-y-1/2 ${config.textMuted} hover:${config.text} transition-colors`}
-              >
-                <X className="w-4 h-4" />
-              </button>
-            )}
-          </div>
-          <div className="relative">
-            <select
-              value={sort}
-              onChange={e => setSort(e.target.value)}
-              className={`appearance-none pl-4 pr-9 py-2.5 border ${config.border} rounded-xl text-sm focus:outline-none focus:ring-2 ${config.ring} ${config.surface} ${config.text} shadow-sm font-medium cursor-pointer transition-colors`}
-            >
-              <option value="default">Sort: Default</option>
-              <option value="price-asc">Price: Low to High</option>
-              <option value="price-desc">Price: High to Low</option>
-              <option value="name">Name: A–Z</option>
-            </select>
-            <ChevronDown className={`absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 ${config.textMuted} pointer-events-none`} />
-          </div>
+      {/* Filters */}
+      <div className={['flex flex-col md:flex-row gap-4 mb-8 p-4 rounded-2xl border', config.surface, config.border].join(' ')}>
+        {/* Search */}
+        <div className="relative flex-1">
+          <Search className={['absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4', config.textMuted].join(' ')} />
+          <input
+            type="text"
+            placeholder="Search products..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className={[
+              'w-full pl-9 pr-4 py-2.5 rounded-xl border text-sm outline-none transition-colors',
+              config.bg,
+              config.border,
+              config.text,
+            ].join(' ')}
+          />
         </div>
 
-        {/* Category Pills */}
-        <div className="flex flex-wrap gap-2 mb-8">
-          {allCategories.map(cat => (
+        {/* Category */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <SlidersHorizontal className={['w-4 h-4', config.textMuted].join(' ')} />
+          {categories.map(cat => (
             <button
               key={cat}
-              onClick={() => setCategory(cat === 'All' ? '' : cat)}
-              className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all duration-200 ${
-                (cat === 'All' && !category) || category === cat
-                  ? `${config.primary} text-white shadow-sm`
-                  : `${config.surface} ${config.textMuted} border ${config.border} hover:${config.primaryText}`
-              }`}
+              onClick={() => setCategory(cat)}
+              className={[
+                'px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors',
+                category === cat
+                  ? ['text-white border-transparent', config.primary].join(' ')
+                  : [config.textMuted, config.border].join(' '),
+              ].join(' ')}
             >
               {cat}
             </button>
           ))}
         </div>
 
-        {/* Error */}
-        {error && !loading && (
-          <div className="bg-red-50 border border-red-200 rounded-2xl p-6 text-center mb-6">
-            <p className="text-red-600 font-semibold text-sm">{error}</p>
-          </div>
-        )}
+        {/* Sort */}
+        <select
+          value={sort}
+          onChange={e => setSort(e.target.value)}
+          className={[
+            'px-3 py-2.5 rounded-xl border text-sm outline-none transition-colors',
+            config.bg,
+            config.border,
+            config.text,
+          ].join(' ')}
+        >
+          <option value="default">Sort: Default</option>
+          <option value="price-asc">Price: Low to High</option>
+          <option value="price-desc">Price: High to Low</option>
+          <option value="rating">Top Rated</option>
+        </select>
+      </div>
 
-        {/* Grid */}
-        {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className={`${config.surface} rounded-2xl border ${config.border} overflow-hidden animate-pulse`}>
-                <div className={`aspect-square ${config.skeleton}`} />
-                <div className="p-4 flex flex-col gap-3">
-                  <div className={`h-3 ${config.skeleton} rounded-full w-1/3`} />
-                  <div className={`h-4 ${config.skeleton} rounded-full w-3/4`} />
-                  <div className={`h-3 ${config.skeleton} rounded-full w-1/2`} />
-                  <div className={`h-10 ${config.skeleton} rounded-xl mt-2`} />
-                </div>
-              </div>
+      {/* Grid */}
+      {loading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className={['rounded-2xl h-80 animate-pulse', config.skeleton].join(' ')} />
+          ))}
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="text-center py-24">
+          <p className={['text-5xl mb-4'].join(' ')}>🔍</p>
+          <p className={['text-xl font-bold mb-2', config.text].join(' ')}>No products found</p>
+          <p className={['text-sm', config.textMuted].join(' ')}>
+            {products.length === 0
+              ? 'Add products to your Supabase database to see them here.'
+              : 'Try adjusting your search or filters.'}
+          </p>
+        </div>
+      ) : (
+        <>
+          <p className={['text-sm mb-4', config.textMuted].join(' ')}>
+            {filtered.length} product{filtered.length !== 1 ? 's' : ''} found
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filtered.map(product => (
+              <ProductCard key={product.id} product={product} />
             ))}
           </div>
-        ) : filtered.length === 0 ? (
-          <div className="text-center py-24">
-            <div className={`inline-flex items-center justify-center w-16 h-16 ${config.surface} border ${config.border} rounded-2xl mb-4`}>
-              <SlidersHorizontal className={`w-7 h-7 ${config.textMuted}`} />
-            </div>
-            <p className={`${config.text} font-bold text-lg mb-2`}>No products found</p>
-            <p className={`${config.textMuted} text-sm mb-6`}>Try adjusting your search or filters.</p>
-            <button
-              onClick={() => { setSearch(''); setCategory(''); }}
-              className={`${config.primary} ${config.primaryHover} text-white text-sm font-semibold px-6 py-2.5 rounded-full transition-colors`}
-            >
-              Clear Filters
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {filtered.map(p => <ProductCard key={p.id} product={p} />)}
-          </div>
-        )}
-      </div>
+        </>
+      )}
     </div>
-  );
-}
-
-export default function ProductsPage() {
-  const { config } = useTheme();
-  return (
-    <Suspense
-      fallback={
-        <div className={`min-h-screen ${config.bg}`}>
-          <div className={`${config.surface} border-b ${config.border}`}>
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-              <div className={`h-10 ${config.skeleton} rounded-xl w-48 animate-pulse mb-2`} />
-              <div className={`h-4 ${config.skeleton} rounded w-32 animate-pulse`} />
-            </div>
-          </div>
-        </div>
-      }
-    >
-      <ProductsContent />
-    </Suspense>
   );
 }

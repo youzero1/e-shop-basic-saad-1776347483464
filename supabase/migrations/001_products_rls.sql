@@ -1,8 +1,9 @@
 -- Enable RLS on products table
-alter table products enable row level security;
+alter table if exists products enable row level security;
 
 -- Allow anyone (anon) to read products
-create policy "Public read access"
+drop policy if exists "anon can read products" on products;
+create policy "anon can read products"
   on products
   for select
   to anon

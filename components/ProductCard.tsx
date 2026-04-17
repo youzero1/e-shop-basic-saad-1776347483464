@@ -19,31 +19,49 @@ export default function ProductCard({ product }: { product: Product }) {
       ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
       : null;
 
+  const cardClasses = [
+    'rounded-2xl overflow-hidden flex flex-col h-full border',
+    'shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300',
+    config.surface,
+    config.border,
+  ].join(' ');
+
+  const addBtnClasses = [
+    'w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 text-white',
+    added ? 'bg-emerald-500' : [config.primary, config.primaryHover].join(' '),
+  ].join(' ');
+
   return (
     <Link href={`/products/${product.id}`} className="group block h-full">
-      <div className={`${config.surface} rounded-2xl overflow-hidden flex flex-col h-full border ${config.border} shadow-[0_1px_3px_rgba(0,0,0,0.08)] hover:shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] hover:-translate-y-1 transition-all duration-300`}>
+      <div className={cardClasses}>
         {/* Image */}
-        <div className={`relative aspect-square ${config.bg} overflow-hidden`}>
-          <Image
-            src={product.image}
-            alt={product.name}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-500"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className={['relative aspect-square overflow-hidden', config.bg].join(' ')}>
+          {product.image ? (
+            <Image
+              src={product.image}
+              alt={product.name}
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-4xl">
+              🛍️
+            </div>
+          )}
 
           {/* Badges */}
           <div className="absolute top-3 left-3 flex flex-col gap-1.5">
             {product.badge && (
               <span
-                className={`text-xs font-bold px-2.5 py-1 rounded-full shadow-sm ${
+                className={[
+                  'text-xs font-bold px-2.5 py-1 rounded-full shadow-sm text-white',
                   product.badge === 'Sale'
-                    ? 'bg-rose-500 text-white'
+                    ? 'bg-red-500'
                     : product.badge === 'New'
-                    ? 'bg-emerald-500 text-white'
-                    : 'bg-violet-500 text-white'
-                }`}
+                    ? 'bg-emerald-500'
+                    : 'bg-violet-500',
+                ].join(' ')}
               >
                 {product.badge}
               </span>
@@ -62,20 +80,25 @@ export default function ProductCard({ product }: { product: Product }) {
               setWishlisted(!wishlisted);
             }}
             aria-label="Wishlist"
-            className="absolute top-3 right-3 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full shadow-md flex items-center justify-center hover:scale-110 transition-transform"
+            className="absolute top-3 right-3 w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center hover:scale-110 transition-transform"
           >
             <Heart
-              className={`w-4 h-4 transition-colors ${
-                wishlisted ? 'fill-rose-500 text-rose-500' : 'text-gray-400'
-              }`}
+              className={[
+                'w-4 h-4 transition-colors',
+                wishlisted ? 'fill-red-500 text-red-500' : 'text-gray-400',
+              ].join(' ')}
             />
           </button>
         </div>
 
         {/* Info */}
         <div className="p-4 flex flex-col flex-1 gap-2">
-          <span className={`text-xs font-semibold ${config.primaryText} uppercase tracking-wider`}>{product.category}</span>
-          <h3 className={`text-sm font-semibold ${config.text} line-clamp-2 leading-snug flex-1`}>{product.name}</h3>
+          <span className={['text-xs font-semibold uppercase tracking-wider', config.primaryText].join(' ')}>
+            {product.category}
+          </span>
+          <h3 className={['text-sm font-semibold line-clamp-2 leading-snug flex-1', config.text].join(' ')}>
+            {product.name}
+          </h3>
 
           {/* Rating */}
           <div className="flex items-center gap-1.5">
@@ -83,26 +106,31 @@ export default function ProductCard({ product }: { product: Product }) {
               {[1, 2, 3, 4, 5].map(s => (
                 <Star
                   key={s}
-                  className={`w-3.5 h-3.5 ${
+                  className={[
+                    'w-3.5 h-3.5',
                     s <= Math.round(product.rating)
                       ? 'fill-amber-400 text-amber-400'
-                      : 'fill-gray-200 text-gray-200'
-                  }`}
+                      : 'fill-gray-200 text-gray-200',
+                  ].join(' ')}
                 />
               ))}
             </div>
-            <span className={`text-xs ${config.textMuted}`}>
+            <span className={['text-xs', config.textMuted].join(' ')}>
               {product.rating.toFixed(1)}
               <span className="ml-1 opacity-60">({product.reviews.toLocaleString()})</span>
             </span>
           </div>
 
           {/* Price */}
-          <div className={`flex items-center justify-between mt-auto pt-2 border-t ${config.border}`}>
+          <div className={['flex items-center justify-between mt-auto pt-2 border-t', config.border].join(' ')}>
             <div className="flex items-baseline gap-1.5">
-              <span className={`text-xl font-extrabold ${config.text}`}>${product.price.toFixed(2)}</span>
+              <span className={['text-xl font-extrabold', config.text].join(' ')}>
+                ${product.price.toFixed(2)}
+              </span>
               {product.originalPrice && (
-                <span className={`text-xs ${config.textMuted} line-through`}>${product.originalPrice.toFixed(2)}</span>
+                <span className={['text-xs line-through', config.textMuted].join(' ')}>
+                  ${product.originalPrice.toFixed(2)}
+                </span>
               )}
             </div>
           </div>
@@ -115,11 +143,7 @@ export default function ProductCard({ product }: { product: Product }) {
               setAdded(true);
               setTimeout(() => setAdded(false), 1500);
             }}
-            className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
-              added
-                ? 'bg-emerald-500 text-white shadow-sm shadow-emerald-200'
-                : `${config.primary} ${config.primaryHover} text-white shadow-sm active:scale-95`
-            }`}
+            className={addBtnClasses}
           >
             <ShoppingCart className="w-4 h-4" />
             {added ? 'Added to Cart!' : 'Add to Cart'}

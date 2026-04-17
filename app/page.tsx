@@ -1,253 +1,173 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import {
-  Sparkles,
-  ArrowRight,
-  ChevronRight,
-  Truck,
-  RefreshCw,
-  ShieldCheck,
-  Star,
-} from 'lucide-react';
-import ProductCard from '@/components/ProductCard';
-import { useProducts } from '@/hooks/useProducts';
+import { ArrowRight, ShoppingBag, Shield, Truck, RefreshCw, Star } from 'lucide-react';
 import { useTheme } from '@/context/ThemeContext';
+import ProductCard from '@/components/ProductCard';
+import { createClient } from '@supabase/supabase-js';
+import { Product } from '@/types';
 
-const CATEGORIES = [
-  { label: 'Electronics', emoji: '📱', color: 'bg-blue-50 hover:bg-blue-100 border-blue-100' },
-  { label: 'Footwear', emoji: '👟', color: 'bg-rose-50 hover:bg-rose-100 border-rose-100' },
-  { label: 'Clothing', emoji: '👕', color: 'bg-amber-50 hover:bg-amber-100 border-amber-100' },
-  { label: 'Accessories', emoji: '⌚', color: 'bg-violet-50 hover:bg-violet-100 border-violet-100' },
-  { label: 'Home', emoji: '🏠', color: 'bg-emerald-50 hover:bg-emerald-100 border-emerald-100' },
-  { label: 'All', emoji: '🛍️', color: 'bg-indigo-50 hover:bg-indigo-100 border-indigo-100' },
-];
-
-const TESTIMONIALS = [
-  { name: 'Sarah M.', text: 'Amazing quality and super fast delivery! Will definitely shop again.', rating: 5, avatar: 'SM', color: 'bg-pink-100 text-pink-700' },
-  { name: 'James K.', text: "The best online shopping experience I've ever had. Products are exactly as described.", rating: 5, avatar: 'JK', color: 'bg-indigo-100 text-indigo-700' },
-  { name: 'Emily R.', text: 'Great prices and excellent customer service. Highly recommend ShopZap!', rating: 4, avatar: 'ER', color: 'bg-emerald-100 text-emerald-700' },
-];
+function getSupabase() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !key) return null;
+  return createClient(url, key);
+}
 
 export default function HomePage() {
-  const { products, loading } = useProducts();
   const { config } = useTheme();
-  const featured = products.slice(0, 4);
+  const [featured, setFeatured] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const supabase = getSupabase();
+    if (!supabase) { setLoading(false); return; }
+    supabase
+      .from('products')
+      .select('*')
+      .limit(4)
+      .then(({ data }) => {
+        if (data) {
+          setFeatured(
+            data.map((p: any) => ({
+              id: String(p.id),
+              name: p.name,
+              price: Number(p.price),
+              originalPrice: p.original_price ? Number(p.original_price) : undefined,
+              description: p.description,
+              category: p.category,
+              image: p.image,
+              rating: Number(p.rating),
+              reviews: Number(p.reviews),
+              badge: p.badge ?? undefined,
+            }))
+          );
+        }
+        setLoading(false);
+      });
+  }, []);
+
+  const features = [
+    { icon: Truck, title: 'Free Shipping', desc: 'On orders over $50' },
+    { icon: Shield, title: 'Secure Payments', desc: '100% protected' },
+    { icon: RefreshCw, title: 'Easy Returns', desc: '30-day return policy' },
+    { icon: Star, title: 'Top Rated', desc: '50k+ happy customers' },
+  ];
 
   return (
-    <div className={`${config.bg} transition-colors duration-300`}>
+    <div className="flex flex-col">
       {/* Hero */}
-      <section className={`relative overflow-hidden bg-gradient-to-br ${config.heroBg} text-white`}>
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute -top-40 -left-40 w-[500px] h-[500px] bg-white/10 rounded-full blur-3xl" />
-          <div className="absolute -bottom-20 -right-20 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
-        </div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-          <div>
-            <span className="inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-sm text-white text-xs font-bold px-3 py-1.5 rounded-full mb-6 uppercase tracking-widest border border-white/10">
-              <Sparkles className="w-3.5 h-3.5 text-amber-300" /> Summer Sale — Up to 40% Off
-            </span>
-            <h1 className="text-4xl md:text-6xl font-extrabold leading-[1.1] mb-5 tracking-tight">
-              Shop the Best.<br />
-              <span className={config.heroText}>Live the Rest.</span>
-            </h1>
-            <p className={`${config.heroSub} text-lg mb-8 max-w-md leading-relaxed`}>
-              Discover premium products with fast shipping, easy returns, and unbeatable prices.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <Link
-                href="/products"
-                className="inline-flex items-center gap-2 bg-white text-gray-900 font-bold px-7 py-3.5 rounded-full hover:bg-amber-300 hover:text-gray-900 transition-all shadow-xl hover:shadow-2xl active:scale-95 text-sm"
-              >
-                Shop Now <ArrowRight className="w-4 h-4" />
-              </Link>
-              <Link
-                href="/about"
-                className="inline-flex items-center gap-2 border-2 border-white/30 text-white font-semibold px-7 py-3.5 rounded-full hover:bg-white/10 hover:border-white/50 transition-all text-sm"
-              >
-                Learn More
-              </Link>
-            </div>
-            <div className="flex gap-8 mt-10">
-              {([['10k+', 'Happy Customers'], ['500+', 'Products'], ['4.9★', 'Avg Rating']] as const).map(
-                ([val, label]) => (
-                  <div key={label}>
-                    <p className="text-2xl font-extrabold text-white">{val}</p>
-                    <p className="text-xs text-white/60 mt-0.5">{label}</p>
-                  </div>
-                )
-              )}
-            </div>
-          </div>
-          <div className="relative flex justify-center">
-            <div className="relative w-72 h-72 md:w-[400px] md:h-[400px]">
-              <div className="absolute inset-0 bg-white/10 rounded-3xl blur-2xl scale-105" />
-              <Image
-                src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&h=800&fit=crop"
-                alt="Featured Product"
-                fill
-                className="object-cover rounded-3xl shadow-2xl relative z-10"
-                priority
-              />
-              <div className="absolute -bottom-5 -left-5 bg-white rounded-2xl shadow-xl px-4 py-3 flex items-center gap-3 z-20">
-                <div className="bg-emerald-100 p-2.5 rounded-xl">
-                  <ShieldCheck className="w-5 h-5 text-emerald-600" />
-                </div>
-                <div>
-                  <p className="text-xs text-gray-400 font-medium">Quality Assured</p>
-                  <p className="text-sm font-bold text-gray-800">100% Genuine</p>
-                </div>
-              </div>
-              <div className="absolute -top-4 -right-4 bg-amber-400 rounded-2xl shadow-lg px-3 py-2 z-20">
-                <p className="text-xs font-bold text-amber-900">🔥 Trending</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Trust bar */}
-      <section className={`${config.surface} border-b ${config.border} transition-colors duration-300`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className={`grid grid-cols-1 sm:grid-cols-3 gap-6 divide-y sm:divide-y-0 sm:divide-x ${config.border}`}>
-            {[
-              { icon: <Truck className="w-6 h-6 text-indigo-500" />, title: 'Free Shipping', sub: 'On all orders over $50', bg: 'bg-indigo-50' },
-              { icon: <RefreshCw className="w-6 h-6 text-violet-500" />, title: 'Easy Returns', sub: '30-day no-hassle policy', bg: 'bg-violet-50' },
-              { icon: <ShieldCheck className="w-6 h-6 text-emerald-500" />, title: 'Secure Checkout', sub: '256-bit SSL encryption', bg: 'bg-emerald-50' },
-            ].map((item, i) => (
-              <div key={i} className="flex items-center gap-4 py-4 sm:py-0 sm:px-6 first:pl-0 last:pr-0">
-                <div className={`${item.bg} p-3 rounded-2xl flex-shrink-0`}>{item.icon}</div>
-                <div>
-                  <p className={`font-bold ${config.text} text-sm`}>{item.title}</p>
-                  <p className={`text-xs ${config.textMuted} mt-0.5`}>{item.sub}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Products */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="flex items-end justify-between mb-8">
-          <div>
-            <p className={`text-sm font-bold ${config.primaryText} uppercase tracking-widest mb-1`}>Handpicked for you</p>
-            <h2 className={`text-3xl font-extrabold ${config.text}`}>Featured Products</h2>
-          </div>
-          <Link
-            href="/products"
-            className={`hidden sm:inline-flex items-center gap-1.5 ${config.primaryText} font-semibold text-sm hover:opacity-80 group transition-opacity`}
+      <section
+        className={[
+          'relative overflow-hidden bg-gradient-to-br py-24 px-4 text-center',
+          config.heroBg,
+        ].join(' ')}
+      >
+        <div className="relative z-10 max-w-3xl mx-auto flex flex-col items-center gap-6">
+          <span
+            className={[
+              'inline-flex items-center gap-2 text-sm font-bold uppercase tracking-widest px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-sm',
+              config.heroText,
+            ].join(' ')}
           >
-            View All <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-          </Link>
-        </div>
-
-        {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className={`${config.surface} rounded-2xl border ${config.border} overflow-hidden animate-pulse`}>
-                <div className={`aspect-square ${config.skeleton}`} />
-                <div className="p-4 flex flex-col gap-3">
-                  <div className={`h-3 ${config.skeleton} rounded-full w-1/3`} />
-                  <div className={`h-4 ${config.skeleton} rounded-full w-3/4`} />
-                  <div className={`h-3 ${config.skeleton} rounded-full w-1/2`} />
-                  <div className={`h-10 ${config.skeleton} rounded-xl mt-2`} />
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : featured.length === 0 ? (
-          <div className={`${config.surface} border border-dashed ${config.border} rounded-2xl p-16 text-center`}>
-            <div className={`inline-flex items-center justify-center w-16 h-16 ${config.bg} rounded-2xl mb-4`}>
-              <Sparkles className={`w-8 h-8 ${config.primaryText} opacity-50`} />
-            </div>
-            <p className={`font-bold ${config.text} text-lg mb-2`}>No products yet</p>
-            <p className={`${config.textMuted} text-sm max-w-sm mx-auto`}>
-              Run the seed SQL in your Supabase project to populate the products table.
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featured.map(p => <ProductCard key={p.id} product={p} />)}
-          </div>
-        )}
-
-        <div className="sm:hidden mt-6 text-center">
-          <Link href="/products" className={`inline-flex items-center gap-2 ${config.primaryText} font-semibold text-sm`}>
-            View All Products <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
-      </section>
-
-      {/* Categories */}
-      <section className={`${config.surface} py-16 transition-colors duration-300`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10">
-            <p className={`text-sm font-bold ${config.primaryText} uppercase tracking-widest mb-1`}>Browse by</p>
-            <h2 className={`text-3xl font-extrabold ${config.text}`}>Shop by Category</h2>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-            {CATEGORIES.map(cat => (
-              <Link
-                key={cat.label}
-                href={cat.label === 'All' ? '/products' : `/products?category=${cat.label}`}
-                className={`${cat.color} border rounded-2xl p-5 flex flex-col items-center gap-3 transition-all duration-200 hover:-translate-y-1 hover:shadow-md group`}
-              >
-                <span className="text-3xl group-hover:scale-110 transition-transform duration-200">{cat.emoji}</span>
-                <span className="text-sm font-semibold text-gray-700">{cat.label}</span>
-              </Link>
-            ))}
+            <ShoppingBag className="w-4 h-4" />
+            New Arrivals — Summer 2024
+          </span>
+          <h1 className="text-5xl md:text-6xl font-black text-white leading-tight">
+            Discover
+            <span className={[' block', config.heroText].join('')}> Amazing Deals</span>
+          </h1>
+          <p className={['text-lg max-w-xl', config.heroSub].join(' ')}>
+            Shop premium products at unbeatable prices. Quality guaranteed, delivery in 2–5 days.
+          </p>
+          <div className="flex flex-wrap gap-3 justify-center">
+            <Link
+              href="/products"
+              className="inline-flex items-center gap-2 bg-white text-gray-900 font-bold px-7 py-3.5 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
+            >
+              Shop Now <ArrowRight className="w-4 h-4" />
+            </Link>
+            <Link
+              href="/about"
+              className="inline-flex items-center gap-2 bg-white/10 text-white font-bold px-7 py-3.5 rounded-full border border-white/20 hover:bg-white/20 transition-all duration-200"
+            >
+              Learn More
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="text-center mb-10">
-          <p className={`text-sm font-bold ${config.primaryText} uppercase tracking-widest mb-1`}>Happy customers</p>
-          <h2 className={`text-3xl font-extrabold ${config.text}`}>What People Say</h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {TESTIMONIALS.map((t, i) => (
-            <div key={i} className={`${config.surface} rounded-2xl p-6 shadow-sm border ${config.border} flex flex-col gap-4 hover:shadow-md transition-shadow`}>
-              <div className="flex gap-0.5">
-                {[1, 2, 3, 4, 5].map(s => (
-                  <Star
-                    key={s}
-                    className={`w-4 h-4 ${s <= t.rating ? 'fill-amber-400 text-amber-400' : 'fill-gray-100 text-gray-100'}`}
-                  />
-                ))}
-              </div>
-              <p className={`${config.textMuted} text-sm leading-relaxed flex-1`}>&ldquo;{t.text}&rdquo;</p>
-              <div className={`flex items-center gap-3 pt-2 border-t ${config.border}`}>
-                <div className={`w-10 h-10 rounded-full ${t.color} flex items-center justify-center text-xs font-bold flex-shrink-0`}>
-                  {t.avatar}
-                </div>
-                <div>
-                  <p className={`font-bold ${config.text} text-sm`}>{t.name}</p>
-                  <p className={`text-xs ${config.textMuted}`}>Verified Buyer</p>
-                </div>
-              </div>
+      {/* Features strip */}
+      <section className={['py-10 px-4 border-b', config.surface, config.border].join(' ')}>
+        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
+          {features.map(({ icon: Icon, title, desc }) => (
+            <div key={title} className="flex flex-col items-center text-center gap-2">
+              <span className={['w-10 h-10 rounded-xl flex items-center justify-center text-white', config.primary].join(' ')}>
+                <Icon className="w-5 h-5" />
+              </span>
+              <span className={['text-sm font-bold', config.text].join(' ')}>{title}</span>
+              <span className={['text-xs', config.textMuted].join(' ')}>{desc}</span>
             </div>
           ))}
         </div>
       </section>
 
-      {/* CTA */}
-      <section className={`bg-gradient-to-r ${config.ctaBg} text-white py-20`}>
-        <div className="max-w-3xl mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-extrabold mb-4 tracking-tight">Ready to Start Shopping?</h2>
-          <p className="text-white/80 text-lg mb-8 max-w-xl mx-auto">
-            Join thousands of happy customers and discover amazing deals today.
-          </p>
+      {/* Featured Products */}
+      <section className="py-16 px-4 max-w-7xl mx-auto w-full">
+        <div className="flex items-end justify-between mb-10">
+          <div>
+            <p className={['text-xs font-bold uppercase tracking-widest mb-1', config.primaryText].join(' ')}>
+              Handpicked for You
+            </p>
+            <h2 className={['text-3xl font-extrabold', config.text].join(' ')}>Featured Products</h2>
+          </div>
           <Link
             href="/products"
-            className="inline-flex items-center gap-2 bg-white text-gray-900 font-bold px-8 py-4 rounded-full hover:bg-amber-300 transition-all shadow-2xl text-base active:scale-95"
+            className={['flex items-center gap-1 text-sm font-semibold', config.primaryText].join(' ')}
           >
-            Browse All Products <ArrowRight className="w-5 h-5" />
+            View All <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
+
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className={['rounded-2xl h-80 animate-pulse', config.skeleton].join(' ')} />
+            ))}
+          </div>
+        ) : featured.length === 0 ? (
+          <div className="text-center py-20">
+            <p className={['text-lg font-semibold', config.textMuted].join(' ')}>
+              No products yet. Add some in your Supabase database!
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {featured.map(product => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* CTA Banner */}
+      <section
+        className={[
+          'mx-4 mb-16 rounded-3xl bg-gradient-to-r py-16 px-8 text-center text-white overflow-hidden',
+          config.ctaBg,
+        ].join(' ')}
+      >
+        <h2 className="text-3xl font-black mb-3">Ready to start shopping?</h2>
+        <p className="text-white/80 mb-6 max-w-md mx-auto">
+          Browse our full catalog and find exactly what you need.
+        </p>
+        <Link
+          href="/products"
+          className="inline-flex items-center gap-2 bg-white text-gray-900 font-bold px-8 py-3.5 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
+        >
+          Browse All Products <ArrowRight className="w-4 h-4" />
+        </Link>
       </section>
     </div>
   );

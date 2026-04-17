@@ -1,17 +1,16 @@
 export interface Product {
-  id: number;
+  id: string;
   name: string;
   price: number;
   originalPrice?: number;
-  image: string;
+  description: string;
   category: string;
+  image: string;
   rating: number;
   reviews: number;
   badge?: string;
-  description: string;
 }
 
-export interface CartItem {
-  product: Product;
+export interface CartItem extends Product {
   quantity: number;
 }

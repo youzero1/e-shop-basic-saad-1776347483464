@@ -21,12 +21,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={inter.variable}>
-      <body className="min-h-screen flex flex-col font-sans">
+      <body style={{ margin: 0, padding: 0 }}>
         <ThemeProvider>
           <CartProvider>
             <ThemeWrapper>
               <Navbar />
-              <main className="flex-1">{children}</main>
+              <main style={{ flex: 1 }}>{children}</main>
               <Footer />
             </ThemeWrapper>
           </CartProvider>

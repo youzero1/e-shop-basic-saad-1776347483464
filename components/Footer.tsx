@@ -8,54 +8,41 @@ export default function Footer() {
   const { config } = useTheme();
 
   return (
-    <footer className={`${config.surface} border-t ${config.border} transition-colors duration-300`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Brand */}
-          <div className="col-span-1 md:col-span-2">
-            <Link href="/" className={`flex items-center gap-2 font-extrabold text-xl ${config.primaryText} mb-3`}>
-              <span className={`${config.primary} text-white p-1.5 rounded-lg`}>
-                <Zap className="w-4 h-4" />
-              </span>
-              ShopZap
-            </Link>
-            <p className={`text-sm ${config.textMuted} max-w-xs leading-relaxed`}>
-              Discover premium products with fast shipping, easy returns, and unbeatable prices.
-            </p>
-          </div>
+    <footer
+      className={[
+        'border-t mt-auto py-10 px-4 transition-colors duration-300',
+        config.surface,
+        config.border,
+      ].join(' ')}
+    >
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+        <Link
+          href="/"
+          className={['flex items-center gap-2 font-extrabold text-lg', config.primaryText].join(' ')}
+        >
+          <span className={['p-1.5 rounded-lg text-white', config.primary].join(' ')}>
+            <Zap className="w-4 h-4" />
+          </span>
+          ShopZap
+        </Link>
 
-          {/* Links */}
-          <div>
-            <p className={`text-xs font-bold ${config.text} uppercase tracking-widest mb-4`}>Shop</p>
-            <ul className="space-y-2">
-              {[['All Products', '/products'], ['New Arrivals', '/products'], ['Sale', '/products']].map(([label, href]) => (
-                <li key={label}>
-                  <Link href={href} className={`text-sm ${config.textMuted} hover:${config.primaryText} transition-colors`}>
-                    {label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+        <nav className="flex flex-wrap items-center gap-6">
+          {([['/', 'Home'], ['/products', 'Products'], ['/about', 'About'], ['/cart', 'Cart']] as const).map(
+            ([href, label]) => (
+              <Link
+                key={href}
+                href={href}
+                className={['text-sm font-medium hover:underline transition-colors', config.textMuted].join(' ')}
+              >
+                {label}
+              </Link>
+            )
+          )}
+        </nav>
 
-          <div>
-            <p className={`text-xs font-bold ${config.text} uppercase tracking-widest mb-4`}>Company</p>
-            <ul className="space-y-2">
-              {[['About Us', '/about'], ['Contact', '/about'], ['Privacy', '/about']].map(([label, href]) => (
-                <li key={label}>
-                  <Link href={href} className={`text-sm ${config.textMuted} hover:${config.primaryText} transition-colors`}>
-                    {label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        <div className={`border-t ${config.border} mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3`}>
-          <p className={`text-xs ${config.textMuted}`}>© 2024 ShopZap. All rights reserved.</p>
-          <p className={`text-xs ${config.textMuted}`}>Made with ❤️ for great shopping</p>
-        </div>
+        <p className={['text-sm', config.textMuted].join(' ')}>
+          © {new Date().getFullYear()} ShopZap. All rights reserved.
+        </p>
       </div>
     </footer>
   );
