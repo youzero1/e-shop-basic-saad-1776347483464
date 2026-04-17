@@ -4,6 +4,8 @@ import './globals.css';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { CartProvider } from '@/context/CartContext';
+import { ThemeProvider } from '@/context/ThemeContext';
+import ThemeWrapper from '@/components/ThemeWrapper';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
@@ -19,12 +21,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={inter.variable}>
-      <body className="min-h-screen flex flex-col bg-gray-50 font-sans">
-        <CartProvider>
-          <Navbar />
-          <main className="flex-1">{children}</main>
-          <Footer />
-        </CartProvider>
+      <body className="min-h-screen flex flex-col font-sans">
+        <ThemeProvider>
+          <CartProvider>
+            <ThemeWrapper>
+              <Navbar />
+              <main className="flex-1">{children}</main>
+              <Footer />
+            </ThemeWrapper>
+          </CartProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
 import { useProducts } from '@/hooks/useProducts';
+import { useTheme } from '@/context/ThemeContext';
 
 const CATEGORIES = [
   { label: 'Electronics', emoji: '📱', color: 'bg-blue-50 hover:bg-blue-100 border-blue-100' },
@@ -31,16 +32,16 @@ const TESTIMONIALS = [
 
 export default function HomePage() {
   const { products, loading } = useProducts();
+  const { config } = useTheme();
   const featured = products.slice(0, 4);
 
   return (
-    <div className="bg-gray-50">
+    <div className={`${config.bg} transition-colors duration-300`}>
       {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-indigo-700 via-indigo-600 to-violet-700 text-white">
+      <section className={`relative overflow-hidden bg-gradient-to-br ${config.heroBg} text-white`}>
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute -top-40 -left-40 w-[500px] h-[500px] bg-violet-500 rounded-full opacity-20 blur-3xl" />
-          <div className="absolute -bottom-20 -right-20 w-96 h-96 bg-indigo-300 rounded-full opacity-20 blur-3xl" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-violet-600 rounded-full opacity-10 blur-3xl" />
+          <div className="absolute -top-40 -left-40 w-[500px] h-[500px] bg-white/10 rounded-full blur-3xl" />
+          <div className="absolute -bottom-20 -right-20 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
         </div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <div>
@@ -49,15 +50,15 @@ export default function HomePage() {
             </span>
             <h1 className="text-4xl md:text-6xl font-extrabold leading-[1.1] mb-5 tracking-tight">
               Shop the Best.<br />
-              <span className="text-amber-300">Live the Rest.</span>
+              <span className={config.heroText}>Live the Rest.</span>
             </h1>
-            <p className="text-indigo-100 text-lg mb-8 max-w-md leading-relaxed">
+            <p className={`${config.heroSub} text-lg mb-8 max-w-md leading-relaxed`}>
               Discover premium products with fast shipping, easy returns, and unbeatable prices.
             </p>
             <div className="flex flex-wrap gap-3">
               <Link
                 href="/products"
-                className="inline-flex items-center gap-2 bg-white text-indigo-700 font-bold px-7 py-3.5 rounded-full hover:bg-amber-300 hover:text-indigo-900 transition-all shadow-xl hover:shadow-2xl active:scale-95 text-sm"
+                className="inline-flex items-center gap-2 bg-white text-gray-900 font-bold px-7 py-3.5 rounded-full hover:bg-amber-300 hover:text-gray-900 transition-all shadow-xl hover:shadow-2xl active:scale-95 text-sm"
               >
                 Shop Now <ArrowRight className="w-4 h-4" />
               </Link>
@@ -73,7 +74,7 @@ export default function HomePage() {
                 ([val, label]) => (
                   <div key={label}>
                     <p className="text-2xl font-extrabold text-white">{val}</p>
-                    <p className="text-xs text-indigo-200 mt-0.5">{label}</p>
+                    <p className="text-xs text-white/60 mt-0.5">{label}</p>
                   </div>
                 )
               )}
@@ -81,7 +82,7 @@ export default function HomePage() {
           </div>
           <div className="relative flex justify-center">
             <div className="relative w-72 h-72 md:w-[400px] md:h-[400px]">
-              <div className="absolute inset-0 bg-gradient-to-br from-violet-400 to-indigo-400 rounded-3xl opacity-20 blur-2xl scale-105" />
+              <div className="absolute inset-0 bg-white/10 rounded-3xl blur-2xl scale-105" />
               <Image
                 src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&h=800&fit=crop"
                 alt="Featured Product"
@@ -107,19 +108,19 @@ export default function HomePage() {
       </section>
 
       {/* Trust bar */}
-      <section className="bg-white border-b border-gray-100">
+      <section className={`${config.surface} border-b ${config.border} transition-colors duration-300`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 divide-y sm:divide-y-0 sm:divide-x divide-gray-100">
+          <div className={`grid grid-cols-1 sm:grid-cols-3 gap-6 divide-y sm:divide-y-0 sm:divide-x ${config.border}`}>
             {[
-              { icon: <Truck className="w-6 h-6 text-indigo-600" />, title: 'Free Shipping', sub: 'On all orders over $50', bg: 'bg-indigo-50' },
-              { icon: <RefreshCw className="w-6 h-6 text-violet-600" />, title: 'Easy Returns', sub: '30-day no-hassle policy', bg: 'bg-violet-50' },
-              { icon: <ShieldCheck className="w-6 h-6 text-emerald-600" />, title: 'Secure Checkout', sub: '256-bit SSL encryption', bg: 'bg-emerald-50' },
+              { icon: <Truck className="w-6 h-6 text-indigo-500" />, title: 'Free Shipping', sub: 'On all orders over $50', bg: 'bg-indigo-50' },
+              { icon: <RefreshCw className="w-6 h-6 text-violet-500" />, title: 'Easy Returns', sub: '30-day no-hassle policy', bg: 'bg-violet-50' },
+              { icon: <ShieldCheck className="w-6 h-6 text-emerald-500" />, title: 'Secure Checkout', sub: '256-bit SSL encryption', bg: 'bg-emerald-50' },
             ].map((item, i) => (
               <div key={i} className="flex items-center gap-4 py-4 sm:py-0 sm:px-6 first:pl-0 last:pr-0">
                 <div className={`${item.bg} p-3 rounded-2xl flex-shrink-0`}>{item.icon}</div>
                 <div>
-                  <p className="font-bold text-gray-900 text-sm">{item.title}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">{item.sub}</p>
+                  <p className={`font-bold ${config.text} text-sm`}>{item.title}</p>
+                  <p className={`text-xs ${config.textMuted} mt-0.5`}>{item.sub}</p>
                 </div>
               </div>
             ))}
@@ -131,12 +132,12 @@ export default function HomePage() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="flex items-end justify-between mb-8">
           <div>
-            <p className="text-sm font-bold text-indigo-600 uppercase tracking-widest mb-1">Handpicked for you</p>
-            <h2 className="text-3xl font-extrabold text-gray-900">Featured Products</h2>
+            <p className={`text-sm font-bold ${config.primaryText} uppercase tracking-widest mb-1`}>Handpicked for you</p>
+            <h2 className={`text-3xl font-extrabold ${config.text}`}>Featured Products</h2>
           </div>
           <Link
             href="/products"
-            className="hidden sm:inline-flex items-center gap-1.5 text-indigo-600 font-semibold text-sm hover:text-indigo-800 group transition-colors"
+            className={`hidden sm:inline-flex items-center gap-1.5 ${config.primaryText} font-semibold text-sm hover:opacity-80 group transition-opacity`}
           >
             View All <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
           </Link>
@@ -145,24 +146,24 @@ export default function HomePage() {
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="bg-white rounded-2xl border border-gray-100 overflow-hidden animate-pulse">
-                <div className="aspect-square bg-gray-100" />
+              <div key={i} className={`${config.surface} rounded-2xl border ${config.border} overflow-hidden animate-pulse`}>
+                <div className={`aspect-square ${config.skeleton}`} />
                 <div className="p-4 flex flex-col gap-3">
-                  <div className="h-3 bg-gray-100 rounded-full w-1/3" />
-                  <div className="h-4 bg-gray-100 rounded-full w-3/4" />
-                  <div className="h-3 bg-gray-100 rounded-full w-1/2" />
-                  <div className="h-10 bg-gray-100 rounded-xl mt-2" />
+                  <div className={`h-3 ${config.skeleton} rounded-full w-1/3`} />
+                  <div className={`h-4 ${config.skeleton} rounded-full w-3/4`} />
+                  <div className={`h-3 ${config.skeleton} rounded-full w-1/2`} />
+                  <div className={`h-10 ${config.skeleton} rounded-xl mt-2`} />
                 </div>
               </div>
             ))}
           </div>
         ) : featured.length === 0 ? (
-          <div className="bg-white border border-dashed border-gray-200 rounded-2xl p-16 text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-50 rounded-2xl mb-4">
-              <Sparkles className="w-8 h-8 text-indigo-400" />
+          <div className={`${config.surface} border border-dashed ${config.border} rounded-2xl p-16 text-center`}>
+            <div className={`inline-flex items-center justify-center w-16 h-16 ${config.bg} rounded-2xl mb-4`}>
+              <Sparkles className={`w-8 h-8 ${config.primaryText} opacity-50`} />
             </div>
-            <p className="font-bold text-gray-700 text-lg mb-2">No products yet</p>
-            <p className="text-gray-400 text-sm max-w-sm mx-auto">
+            <p className={`font-bold ${config.text} text-lg mb-2`}>No products yet</p>
+            <p className={`${config.textMuted} text-sm max-w-sm mx-auto`}>
               Run the seed SQL in your Supabase project to populate the products table.
             </p>
           </div>
@@ -173,18 +174,18 @@ export default function HomePage() {
         )}
 
         <div className="sm:hidden mt-6 text-center">
-          <Link href="/products" className="inline-flex items-center gap-2 text-indigo-600 font-semibold text-sm">
+          <Link href="/products" className={`inline-flex items-center gap-2 ${config.primaryText} font-semibold text-sm`}>
             View All Products <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       </section>
 
       {/* Categories */}
-      <section className="bg-white py-16">
+      <section className={`${config.surface} py-16 transition-colors duration-300`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
-            <p className="text-sm font-bold text-indigo-600 uppercase tracking-widest mb-1">Browse by</p>
-            <h2 className="text-3xl font-extrabold text-gray-900">Shop by Category</h2>
+            <p className={`text-sm font-bold ${config.primaryText} uppercase tracking-widest mb-1`}>Browse by</p>
+            <h2 className={`text-3xl font-extrabold ${config.text}`}>Shop by Category</h2>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             {CATEGORIES.map(cat => (
@@ -204,12 +205,12 @@ export default function HomePage() {
       {/* Testimonials */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="text-center mb-10">
-          <p className="text-sm font-bold text-indigo-600 uppercase tracking-widest mb-1">Happy customers</p>
-          <h2 className="text-3xl font-extrabold text-gray-900">What People Say</h2>
+          <p className={`text-sm font-bold ${config.primaryText} uppercase tracking-widest mb-1`}>Happy customers</p>
+          <h2 className={`text-3xl font-extrabold ${config.text}`}>What People Say</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {TESTIMONIALS.map((t, i) => (
-            <div key={i} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col gap-4 hover:shadow-md transition-shadow">
+            <div key={i} className={`${config.surface} rounded-2xl p-6 shadow-sm border ${config.border} flex flex-col gap-4 hover:shadow-md transition-shadow`}>
               <div className="flex gap-0.5">
                 {[1, 2, 3, 4, 5].map(s => (
                   <Star
@@ -218,14 +219,14 @@ export default function HomePage() {
                   />
                 ))}
               </div>
-              <p className="text-gray-600 text-sm leading-relaxed flex-1">&ldquo;{t.text}&rdquo;</p>
-              <div className="flex items-center gap-3 pt-2 border-t border-gray-50">
+              <p className={`${config.textMuted} text-sm leading-relaxed flex-1`}>&ldquo;{t.text}&rdquo;</p>
+              <div className={`flex items-center gap-3 pt-2 border-t ${config.border}`}>
                 <div className={`w-10 h-10 rounded-full ${t.color} flex items-center justify-center text-xs font-bold flex-shrink-0`}>
                   {t.avatar}
                 </div>
                 <div>
-                  <p className="font-bold text-gray-800 text-sm">{t.name}</p>
-                  <p className="text-xs text-gray-400">Verified Buyer</p>
+                  <p className={`font-bold ${config.text} text-sm`}>{t.name}</p>
+                  <p className={`text-xs ${config.textMuted}`}>Verified Buyer</p>
                 </div>
               </div>
             </div>
@@ -234,15 +235,15 @@ export default function HomePage() {
       </section>
 
       {/* CTA */}
-      <section className="bg-gradient-to-r from-indigo-600 via-indigo-600 to-violet-600 text-white py-20">
+      <section className={`bg-gradient-to-r ${config.ctaBg} text-white py-20`}>
         <div className="max-w-3xl mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-extrabold mb-4 tracking-tight">Ready to Start Shopping?</h2>
-          <p className="text-indigo-100 text-lg mb-8 max-w-xl mx-auto">
+          <p className="text-white/80 text-lg mb-8 max-w-xl mx-auto">
             Join thousands of happy customers and discover amazing deals today.
           </p>
           <Link
             href="/products"
-            className="inline-flex items-center gap-2 bg-white text-indigo-700 font-bold px-8 py-4 rounded-full hover:bg-amber-300 hover:text-indigo-900 transition-all shadow-2xl text-base active:scale-95"
+            className="inline-flex items-center gap-2 bg-white text-gray-900 font-bold px-8 py-4 rounded-full hover:bg-amber-300 transition-all shadow-2xl text-base active:scale-95"
           >
             Browse All Products <ArrowRight className="w-5 h-5" />
           </Link>
